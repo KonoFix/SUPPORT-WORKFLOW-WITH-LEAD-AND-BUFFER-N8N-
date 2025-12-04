@@ -1,0 +1,1428 @@
+{
+  "name": "AGENTE DE ATENDIMENTO",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c35e0364-ee15-466c-9946-ddb41092870e",
+              "name": "NOME",
+              "value": "={{ $json.body.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "86b9eda8-2f3d-4805-833c-1928766b2cd6",
+              "name": "NUMERO",
+              "value": "={{ $json.body.key.remoteJid}}",
+              "type": "string"
+            },
+            {
+              "id": "a33292cf-8aae-43a6-9cf8-f600d45236d2",
+              "name": "MENSAGEM",
+              "value": "={{ $json.body.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "5e7b3922-775a-47af-a39e-33d24cfe1ca9",
+              "name": "IMAGE URL",
+              "value": "={{ $('GATILHO DE MENSAGENS').item.json.body.message.imageMessage.url }}",
+              "type": "string"
+            },
+            {
+              "id": "0f0bb231-b045-42b3-a2e9-deab4e0eae30",
+              "name": "AUDIO URL",
+              "value": "={{ $json.body.message.audioMessage.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "3db5abce-4f24-4518-a94f-05e36aa2a3d7",
+      "name": "NORMALIZADOR"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "235fd5c1-0cd4-40b8-9514-698877dd322e",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "44c29eb2-e054-43cf-aa66-34edfd0c35c6",
+              "leftValue": "={{ $json.body.broadcast }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4b447538-7fdd-419d-87eb-f331be71bc18",
+              "leftValue": "={{ $json.body.key.remoteJid }}",
+              "rightValue": "={{ $json.body.jid }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "62c16222-a6f7-46ab-a8e4-33fa486626de",
+              "leftValue": "={{ $json.body.key.fromMe }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        -16
+      ],
+      "id": "f42beb71-4001-44b3-b0e0-94ff1ed2d8ae",
+      "name": "FILTROS"
+    },
+    {
+      "parameters": {
+        "tableId": "CADASTRO",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Nome",
+              "fieldValue": "={{ $('NORMALIZADOR').item.json.NOME }}"
+            },
+            {
+              "fieldId": "Numero",
+              "fieldValue": "={{ $('NORMALIZADOR').item.json.NUMERO }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        16
+      ],
+      "id": "bcf24ca4-1a55-4850-9482-6c8f34b6af83",
+      "name": "CRIAR USUARIO",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cJGd0qoC1NQ1Af2u",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4192,
+        96
+      ],
+      "id": "2dd31842-344f-49c1-9e07-00eabcb5a4c8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "i8Gv8AvATk0KRT8d",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "CADASTRO",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Numero",
+              "keyValue": "={{ $('NORMALIZADOR').item.json.NUMERO }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        -96
+      ],
+      "id": "1b8983c4-200f-4c2a-8f62-e6757600edf0",
+      "name": "BUSCAR USUARIO",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "cJGd0qoC1NQ1Af2u",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## GATILHO",
+        "height": 176,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -48
+      ],
+      "id": "b96d39d0-8b28-490c-abf3-a66d24ea89d0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## FILTRAGEM E NORMALIZAÇÃO DE DADOS",
+        "height": 256,
+        "width": 400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "7e0cabb8-5897-448f-b8fd-2b39b14b7aae",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## CADASTRO E ANALISE DE USUÁRIOS",
+        "height": 368,
+        "width": 848,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        -192
+      ],
+      "id": "044ad8f9-da6c-414a-8efd-6ea31848f6b7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "##           AGENTE DE IA RECEPTOR\n\nAtende os cliente e os recepta\n\n",
+        "height": 544,
+        "width": 416,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4160,
+        -224
+      ],
+      "id": "a81d97e5-e83f-4e5e-91c2-2566a02aee36",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## ENVIA A MENSAGEM DO AGENTE",
+        "height": 224,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4608,
+        -176
+      ],
+      "id": "26bee190-d99c-4228-bef1-fd3814699215",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## BUFFER DE MENSAGENS",
+        "height": 368,
+        "width": 928,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -144
+      ],
+      "id": "24adae1c-3339-46d7-bb19-395185175fd2",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.NUMERO }}",
+        "messageData": "={{ $json.MENSAGEM }}{{ $json['AUDIO URL'] }} {{ $json['IMAGE URL'] }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "3b1610d5-5af8-4e9b-85c3-70c0631affd5",
+      "name": "CAPTURA AS MENSAGENS",
+      "credentials": {
+        "redis": {
+          "id": "Wp3qxStT3KzfjdRT",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "MENSAGEM",
+        "key": "={{ $json.NUMERO }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -16
+      ],
+      "id": "4ee6f47f-1eb9-4a4d-a079-e4001bb79e09",
+      "name": "AGRUPA AS MENSAGENS",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "credentials": {
+        "redis": {
+          "id": "Wp3qxStT3KzfjdRT",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8cf3438-6549-46f1-b8bd-10929870ebb6",
+              "name": "MENSAGEM",
+              "value": "={{ $('AGRUPA AS MENSAGENS').item.json.MENSAGEM. join(\" \")}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1504,
+        -96
+      ],
+      "id": "712a744a-f423-4674-a0d0-25ee3e841f2a",
+      "name": "NORMALIZADOR DE ARRANJO"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('ESPERAR').item.json.NUMERO }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -96
+      ],
+      "id": "5f6e9f2a-3a70-43d9-8552-c6455db6f08c",
+      "name": "DELETA O ACUMULO",
+      "credentials": {
+        "redis": {
+          "id": "Wp3qxStT3KzfjdRT",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0af56f65-0ea4-45bf-9aaa-661be8f488f1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2096,
+        -96
+      ],
+      "id": "f461c30c-e180-4a82-baca-201e99aefa97",
+      "name": "VERIFICADOR DE USUARIO"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1d0de811-c0c7-4572-a74f-441c0a6f7c7a",
+              "leftValue": "={{ $json.MENSAGEM.last()}}",
+              "rightValue": "={{ $json.MENSAGEM.last()}}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -16
+      ],
+      "id": "82636d1b-e8ef-43e7-ad96-48ee22a0de2d",
+      "name": "VERIFICADOR DE MENSAGEM"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2560,
+        -96
+      ],
+      "id": "d01be8d0-b5ca-49fc-8403-485fdb1493cb",
+      "name": "MESCLADOR",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.audio }} {{ $json.text }} {{ $json['Imagem Contexto'] }}",
+        "options": {
+          "systemMessage": "Você é o atendente da Konofix, assistência técnica especializada em Apple (iPhones, iMacs, Macbooks) e notebooks gamer. Seu objetivo é acolher clientes e converter atendimentos em serviços.\n\n## SUA PERSONALIDADE\n- Genuinamente prestativo e acolhedor\n- Conversacional e natural (como um atendente experiente)\n- Direto ao ponto, sem enrolação\n- Focado em resolver o problema do cliente\n- Proativo em conduzir para o agendamento/orçamento\n- NUNCA repete as mesmas frases ou informações já ditas\n\n## COMO ATENDER\n1. Cumprimente de forma natural e pergunte como pode ajudar\n2. Identifique rapidamente: aparelho + problema\n3. Demonstre empatia com a situação\n4. Ofereça solução objetiva\n5. Conduza para próximo passo (visita, orçamento, agendamento)\n6. Use linguagem simples e acessível\n\n## DIFERENCIAIS (mencione naturalmente quando relevante)\n- Peças premium e originais\n- Especialização em Apple e notebooks gamer\n\n## INFORMAÇÕES OPERACIONAIS\n**Endereço:** Av. Dr. Antonio Gomes de Barros, 970\n**Localização:** https://maps.app.goo.gl/nGagbXjr2bVbodiC8\n**Horário:** \n- Segunda a Sexta: 9h às 18h\n- Sábado: 9h às 12h\n\n*Só mencione esses dados se o cliente perguntar*\n\n## CAPACIDADES TÉCNICAS\n✓ Analisa fotos do aparelho/problema\n✓ Compreende mensagens de áudio\n✓ Responde de forma humanizada e variada\n\n## REGRAS CRÍTICAS\n❌ NÃO invente valores ou serviços que não estão na base de conhecimento\n❌ NÃO seja prolixo ou use texto corporativo demais\n❌ NÃO repita informações já compartilhadas na conversa\n❌ NÃO atenda assuntos fora do escopo da assistência técnica\n❌ NÃO use frases padrão repetitivas tipo \"estou aqui para ajudar\"\n\n✓ SIM seja conciso (2-4 linhas idealmente)\n✓ SIM varie suas respostas e abordagens\n✓ SIM conduza ativamente para conversão\n✓ SIM demonstre expertise técnica quando necessário\n\n## TRATAMENTO DE EXCEÇÕES\n**Se o cliente perguntar sobre:**\n- Serviço que não existe: \"Não trabalhamos com esse tipo de reparo aqui\"\n- Valor não disponível: \"Preciso avaliar o aparelho pessoalmente pra passar um valor exato. Quando pode trazer?\"\n- Assunto fora do escopo: Redirecione educadamente para o tema técnico\n\n## TOM DE VOZ\nPense como um técnico especializado que é também bom vendedor: confiante, competente, mas acessível. Não seja robótico nem formal demais. Seja o tipo de atendente que você gostaria de encontrar quando seu aparelho quebra.\n\n**Lembre-se:** Cada mensagem deve soar única. Adapte seu vocabulário e estrutura de frase a cada resposta."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4240,
+        -128
+      ],
+      "id": "6817d7f5-7456-4e92-90af-744cd4b80a86",
+      "name": "AGENTE RECEPTIVO"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apistart02.megaapi.com.br/rest/sendMessage/megastart-MOyisHa2Kxj/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer MOyisHa2Kxj"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messageData\": {\n    \"to\": \"{{ $('NORMALIZADOR').item.json.NUMERO }}\",\n    \"text\": \"{{ $json.output }}\"\n  }\n} ",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4672,
+        -128
+      ],
+      "id": "7d02b296-5fc3-4e8e-a43d-4b42e828e3db",
+      "name": "ENVIO DE MENSAGEM"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4864,
+        -128
+      ],
+      "id": "7a6f2066-6029-46d5-b1e5-a982f71da0d6",
+      "name": "PARAR FLUXO"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        80
+      ],
+      "id": "346f2547-1085-455e-9625-77209b145c4b",
+      "name": "PARAR FLUXO1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        -16
+      ],
+      "id": "1c7261d0-ce78-4135-ab67-b0abd8491913",
+      "name": "ESPERAR",
+      "webhookId": "b8806d7a-0cb3-49f7-b1b8-dfa610a1b843"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        -16
+      ],
+      "id": "7db81c8b-3c71-42ff-a1c9-54c202cca79b",
+      "name": "GATILHO DE MENSAGENS",
+      "webhookId": "cdb77f83-d301-4fe9-8b44-8a1e0bf7e73e"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        4448,
+        96
+      ],
+      "id": "d870e220-12d9-47ab-9a47-ff91b29b30ec",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "531528c8-7c6e-4e87-960a-6240e8af2cc9",
+              "name": "image",
+              "value": "={{ $('NORMALIZADOR').item.json['IMAGE URL'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2944,
+        -128
+      ],
+      "id": "ee7c9200-525d-4dc3-a136-8049e61eb259",
+      "name": "IMAGE"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Analise a imagem buscando erros e defeitos na area da assistência técnica, caso encontre um defeito visível fale com o cliente sobre ele, também descreva o que pode ter na imagem, se for algo ofensivo releve e encerre o atendimento",
+        "inputType": "base64",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3568,
+        -128
+      ],
+      "id": "42b3c47b-3fe5-4bee-9ba1-0afa0619ec15",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "i8Gv8AvATk0KRT8d",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f3132a9-c85e-4962-b232-b45a302d6837",
+              "name": "text",
+              "value": "={{ $('NORMALIZADOR').item.json.MENSAGEM }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3408,
+        96
+      ],
+      "id": "62af469b-8904-4acd-9344-74bd68549c4a",
+      "name": "TEXT"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4000,
+        -144
+      ],
+      "id": "e6fb9f83-bbd3-474f-949b-377e4aac1a67",
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "## TRANSCRITOR DE AUDIO E IMAGENS\nRecebe mensagens, áudios e imagens abstrai e interpreta",
+        "height": 800,
+        "width": 1408,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        -448
+      ],
+      "id": "ca3e53c6-2e27-4541-914c-104b24d5ddd2",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('NORMALIZADOR').item.json['AUDIO URL'] }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "f27f026b-a66e-4d7b-8667-1b1e5387c1d3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5357d738-e7f3-4275-a217-3d1cfd30b93b",
+                    "leftValue": "={{ $('NORMALIZADOR').item.json['IMAGE URL'] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "336757d5-5634-4ea0-8ddd-569c04bf5601",
+                    "leftValue": "={{ $('NORMALIZADOR').item.json.MENSAGEM }}",
+                    "rightValue": "mensagem",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mensagem"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2736,
+        -112
+      ],
+      "id": "2b3760d5-9c16-4c3e-a7a2-7275bc19b78a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apistart02.megaapi.com.br/rest/instance/downloadMediaMessage/megastart-MOyisHa2Kxj",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer MOyisHa2Kxj"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messageKeys\": {\n    \"mediaKey\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.imageMessage.mediaKey }}\",\n    \"directPath\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.imageMessage.directPath }}\",\n    \"url\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.imageMessage.url }}\",\n    \"mimetype\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.imageMessage.mimetype }}\",\n    \"messageType\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.messageType }}\"\n  }\n} ",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        -128
+      ],
+      "id": "2a87c760-8508-409f-9032-aed4bf82ea75",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apistart02.megaapi.com.br/rest/instance/downloadMediaMessage/megastart-MOyisHa2Kxj",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer MOyisHa2Kxj"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messageKeys\": {\n    \"mediaKey\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.audioMessage.mediaKey }}\",\n    \"directPath\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.audioMessage.directPath }}\",\n    \"url\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.audioMessage.url }}\" ,\n    \"mimetype\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.message.audioMessage.mimetype }}\",\n    \"messageType\": \"{{ $('GATILHO DE MENSAGENS').item.json.body.messageType }}\"\n  }\n} ",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        -288
+      ],
+      "id": "b304c2e3-7eff-48c6-942c-8be192dd0993",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "pt"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3568,
+        -288
+      ],
+      "id": "2e45df42-75f0-4c66-9005-3a1dec259ceb",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "i8Gv8AvATk0KRT8d",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "175c3ffd-4c9e-418c-bbff-2275424d92d1",
+              "name": "URL",
+              "value": "={{ $('NORMALIZADOR').item.json['AUDIO URL'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2944,
+        -288
+      ],
+      "id": "2cf479d0-acad-4f42-99e2-a47b67fd754b",
+      "name": "URL"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('NORMALIZADOR').item.json.NUMERO }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        4336,
+        112
+      ],
+      "id": "27e14dd7-d1ee-42e0-9e56-64a3c890a2e4",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "AhAiu7B0LIZ9kHmj",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9311845e-01d9-4c88-bb6c-0c60eaf9e2cb",
+              "name": "data",
+              "value": "={{ $json.data.split(',')[1] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3280,
+        -288
+      ],
+      "id": "dc883522-be61-47e2-aad4-5409c4a41d0c",
+      "name": "BASE64 (AUDIO)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "875022c2-6b87-4130-a1d1-2deeaa819c20",
+              "name": "data",
+              "value": "={{ $json.data.split(',')[1]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3280,
+        -128
+      ],
+      "id": "af28d38d-466e-4897-aee9-cf6d3ade26ae",
+      "name": "BASE64 (IMAGEM)"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "fileName": "audio.mp3",
+          "mimeType": "audio/mp3"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        3424,
+        -288
+      ],
+      "id": "99d1ce0b-2f4e-457d-a9ba-d9bacef1c7e6",
+      "name": "Converte para MP3"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "mimeType": "image/jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        3424,
+        -128
+      ],
+      "id": "c885210b-bff1-4238-9076-ea7029cfda45",
+      "name": "Converte para imagem"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55f761aa-0768-48f0-938e-a6ed09dfc558",
+              "name": "audio",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3728,
+        -288
+      ],
+      "id": "8ce67972-d54f-471f-97ad-1c5f4fb45c8d",
+      "name": "NORM AUDIO"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6bc6db0f-9bf3-4def-b3e2-bd3d5b0a2f75",
+              "name": "Imagem Contexto",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3728,
+        -128
+      ],
+      "id": "15b902ce-7913-46e2-a8a4-0e22b76a9716",
+      "name": "NORM IMAGEM"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "FILTROS": {
+      "main": [
+        [
+          {
+            "node": "NORMALIZADOR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORMALIZADOR": {
+      "main": [
+        [
+          {
+            "node": "CAPTURA AS MENSAGENS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRIAR USUARIO": {
+      "main": [
+        [
+          {
+            "node": "MESCLADOR",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENTE RECEPTIVO",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BUSCAR USUARIO": {
+      "main": [
+        [
+          {
+            "node": "VERIFICADOR DE USUARIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CAPTURA AS MENSAGENS": {
+      "main": [
+        [
+          {
+            "node": "ESPERAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGRUPA AS MENSAGENS": {
+      "main": [
+        [
+          {
+            "node": "VERIFICADOR DE MENSAGEM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORMALIZADOR DE ARRANJO": {
+      "main": [
+        [
+          {
+            "node": "DELETA O ACUMULO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DELETA O ACUMULO": {
+      "main": [
+        [
+          {
+            "node": "BUSCAR USUARIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VERIFICADOR DE USUARIO": {
+      "main": [
+        [
+          {
+            "node": "MESCLADOR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CRIAR USUARIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VERIFICADOR DE MENSAGEM": {
+      "main": [
+        [
+          {
+            "node": "NORMALIZADOR DE ARRANJO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PARAR FLUXO1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MESCLADOR": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGENTE RECEPTIVO": {
+      "main": [
+        [
+          {
+            "node": "ENVIO DE MENSAGEM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ENVIO DE MENSAGEM": {
+      "main": [
+        [
+          {
+            "node": "PARAR FLUXO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ESPERAR": {
+      "main": [
+        [
+          {
+            "node": "AGRUPA AS MENSAGENS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GATILHO DE MENSAGENS": {
+      "main": [
+        [
+          {
+            "node": "FILTROS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AGENTE RECEPTIVO",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "NORM IMAGEM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEXT": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AGENTE RECEPTIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "TEXT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "BASE64 (IMAGEM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "BASE64 (AUDIO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "NORM AUDIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENTE RECEPTIVO",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BASE64 (AUDIO)": {
+      "main": [
+        [
+          {
+            "node": "Converte para MP3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BASE64 (IMAGEM)": {
+      "main": [
+        [
+          {
+            "node": "Converte para imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte para MP3": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte para imagem": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORM AUDIO": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORM IMAGEM": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "df591984-6154-465e-815d-233548024591",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2a60f35eb0a330fa196860332e9aa869dc2460d9d60319356a5c2ae119cf584"
+  },
+  "id": "mz35hVzzPXxHpCNb",
+  "tags": []
+}
