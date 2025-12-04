@@ -46,6 +46,3 @@ The `AGENTE DE ATENDIMENTO.json` workflow operates in the following stages:
     * MegaAPI (Header Auth)
 3.  **Environment:** Ensure your Supabase tables.
 
-## 📄 License
-
-[Your License Here]
